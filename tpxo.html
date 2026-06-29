@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPAS-Ocean SAL &mdash; TPXO9 Harmonic Validation</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .run-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .run-tab {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: var(--bg);
+    color: var(--text-muted);
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .run-tab.active {
+    background: var(--card-bg);
+    color: var(--text);
+    border-bottom: 2px solid var(--card-bg);
+  }
+
+  .run-tab.unavailable {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .run-panel { display: none; }
+  .run-panel.active { display: block; }
+
+  .const-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .const-btn {
+    padding: 0.3rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-family: monospace;
+    letter-spacing: 0.03em;
+  }
+
+  .const-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .plot-display {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .plot-display img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  .plot-display .no-data {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .rmse-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .rmse-table th, .rmse-table td {
+    padding: 0.4rem 0.75rem;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rmse-table th:first-child,
+  .rmse-table td:first-child { text-align: left; font-family: monospace; font-weight: 600; }
+
+  .rmse-table th { color: var(--text-muted); font-weight: 500; }
+  .rmse-table tr:last-child td { border-bottom: none; }
+
+  .caption {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MPAS-Ocean <span>SAL Mass Anomaly Tidal Validation</span></h1>
+  <nav>
+    <a href="index.html">About</a>
+    <a href="tpxo.html" class="active">TPXO9 Validation</a>
+    <a href="comparison.html">Station Comparison</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Global Harmonic Validation vs. TPXO9</h2>
+    <p>
+      Tidal constituents extracted from <code>harmonicAnalysis.nc</code>
+      (MPAS-Ocean harmonic analysis member) are compared against TPXO9 atlas
+      amplitudes and phases at every ocean cell. Extraction uses OTPS2
+      <code>extract_HC</code> (128 parallel processes). Error metrics follow
+      the complex RMSE definition:
+    </p>
+    <p style="margin:0.75rem 0 0 1.5rem; font-family:monospace; font-size:0.88rem;">
+      E&#x1D450; = &radic;[ &frac12;(A&#x2098;&#xB2; + A&#x209C;&#xB2;) &minus; A&#x2098; A&#x209C; cos(&phi;&#x2098; &minus; &phi;&#x209C;) ]
+    </p>
+    <p style="margin-top:0.6rem; font-size:0.9rem;">
+      where subscripts m and t denote model and TPXO9 respectively.
+      Global RMSE is area-weighted over all ocean cells with depth &gt; 20 m.
+      Deep ocean excludes cells shallower than 1000 m;
+      shallow ocean restricts to 20&ndash;1000 m depth, |lat| &lt; 66&deg;.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>RMSE Summary</h2>
+    <table class="rmse-table" id="rmse-table">
+      <thead>
+        <tr>
+          <th>Constituent</th>
+          <th colspan="3">BP Anomaly &mdash; Complex RMSE (cm)</th>
+          <th colspan="3">Atm Tide Only &mdash; Complex RMSE (cm)</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th>Global</th><th>Deep</th><th>Shallow</th>
+          <th>Global</th><th>Deep</th><th>Shallow</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Values from compass analysis stdout; fill in after both runs complete -->
+        <tr><td>M2</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
+        <tr><td>S2</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
+        <tr><td>N2</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
+        <tr><td>K1</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
+        <tr><td>O1</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
+      </tbody>
+    </table>
+    <p class="caption">
+      &mdash; = value not yet available (compass analysis run pending).
+      Values filled in from <code>compass run</code> stdout output.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Constituent Maps</h2>
+
+    <!-- Run tabs -->
+    <div class="run-tabs">
+      <div class="run-tab active"     id="tab-bpanomaly"    onclick="selectRun('bpanomaly')">BP Anomaly</div>
+      <div class="run-tab unavailable" id="tab-atm-tide-only" title="Compass analysis run not yet complete">Atm Tide Only</div>
+    </div>
+
+    <!-- Constituent selector -->
+    <div class="const-nav" id="const-nav">
+      <button class="const-btn active" onclick="selectConst('M2')">M2</button>
+      <button class="const-btn"        onclick="selectConst('S2')">S2</button>
+      <button class="const-btn"        onclick="selectConst('N2')">N2</button>
+      <button class="const-btn"        onclick="selectConst('K1')">K1</button>
+      <button class="const-btn"        onclick="selectConst('O1')">O1</button>
+    </div>
+
+    <!-- Plot display -->
+    <div class="plot-display" id="plot-display">
+      <img id="plot-img" src="img/tpxo/bpanomaly/M2_plot.png" alt="M2 TPXO9 comparison">
+    </div>
+    <p class="caption">
+      Each panel shows (top-left) MPAS-Ocean amplitude, (top-right) TPXO9 amplitude,
+      (bottom-left) amplitude RMSE, (bottom-right) complex RMSE.
+      Phase co-tidal lines overlaid on amplitude panels.
+      Color scale in metres.
+    </p>
+  </div>
+
+</div>
+
+<script>
+  var currentRun   = 'bpanomaly';
+  var currentConst = 'M2';
+
+  // Which runs have images available
+  var availableRuns = { 'bpanomaly': true, 'atm-tide-only': false };
+
+  function updatePlot() {
+    var img = document.getElementById('plot-img');
+    var display = document.getElementById('plot-display');
+    if (!availableRuns[currentRun]) {
+      display.innerHTML = '<p class="no-data">Compass analysis run not yet complete for this configuration.</p>';
+      return;
+    }
+    var path = 'img/tpxo/' + currentRun + '/' + currentConst + '_plot.png';
+    display.innerHTML = '<img id="plot-img" src="' + path + '" alt="' + currentConst + ' TPXO9 comparison">';
+  }
+
+  function selectRun(run) {
+    if (!availableRuns[run]) return;
+    currentRun = run;
+    document.querySelectorAll('.run-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.getElementById('tab-' + run).classList.add('active');
+    updatePlot();
+  }
+
+  function selectConst(con) {
+    currentConst = con;
+    document.querySelectorAll('.const-btn').forEach(function(b) {
+      b.classList.toggle('active', b.textContent === con);
+    });
+    updatePlot();
+  }
+</script>
+
+</body>
+</html>
