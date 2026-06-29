@@ -35,6 +35,7 @@
   var runVisible = {};
   RUNS.forEach(function (r) { runVisible[r.key] = true; });
   var ntrEnabled = false;
+  var demeanEnabled = false;
 
   // -----------------------------------------------------------------------
   // Marker coloring (by primary run SSH RMSE)
@@ -335,14 +336,36 @@
 
     var suffix = ntrEnabled ? '_ntr' : '';
     var traces = [];
-    var scale = (data.units === 'mm') ? function(a) { return mmToM(a); } : function(a) { return a; };
+    var toM = (data.units === 'mm') ? function(a) { return mmToM(a); } : function(a) { return a; };
+
+    // Helper: convert full series to metres, compute mean over full record, then
+    // subtract if demeanEnabled (uses full data[key] to get an accurate mean).
+    function seriesMean(key) {
+      var full = data[key];
+      if (!full) return 0;
+      var sum = 0, cnt = 0;
+      for (var i = 0; i < full.length; i++) {
+        if (full[i] !== null) { sum += full[i]; cnt++; }
+      }
+      return cnt > 0 ? sum / cnt : 0;
+    }
+
+    function applyScale(arr, meanRaw) {
+      var out = toM(arr);
+      if (!demeanEnabled) return out;
+      var meanM = (data.units === 'mm') ? meanRaw / 1000 : meanRaw;
+      for (var i = 0; i < out.length; i++) {
+        if (out[i] !== null) out[i] -= meanM;
+      }
+      return out;
+    }
 
     // Obs trace (always shown)
     var obsKey = 'obs' + suffix;
     if (data[obsKey]) {
       traces.push({
         x: times,
-        y: scale(pickByIndices(data[obsKey].slice(startIdx, endIdx), idx)),
+        y: applyScale(pickByIndices(data[obsKey].slice(startIdx, endIdx), idx), seriesMean(obsKey)),
         type: 'scattergl', mode: 'lines',
         name: 'GESLA obs',
         line: { color: OBS_COLOR, width: 1.5 },
@@ -358,7 +381,7 @@
       if (!data[key]) return;
       traces.push({
         x: times,
-        y: scale(pickByIndices(data[key].slice(startIdx, endIdx), idx)),
+        y: applyScale(pickByIndices(data[key].slice(startIdx, endIdx), idx), seriesMean(key)),
         type: 'scattergl', mode: 'lines',
         name: r.label,
         line: { color: r.color, width: 1 },
@@ -412,7 +435,9 @@
     var title = data.site_name || data.station_id;
     if (data.country) title += ' (' + data.country + ')';
 
-    var yLabel = ntrEnabled ? 'Non-tidal residual (m)' : 'Sea level (m)';
+    var yLabel = ntrEnabled
+      ? (demeanEnabled ? 'NTR anomaly (m)' : 'Non-tidal residual (m)')
+      : (demeanEnabled ? 'Sea level anomaly (m)' : 'Sea level (m)');
 
     var layout = {
       xaxis: { title: 'Date' },
@@ -453,13 +478,21 @@
   }
 
   // -----------------------------------------------------------------------
-  // NTR toggle
+  // Toggles
   // -----------------------------------------------------------------------
 
   var ntrBox = document.getElementById('ntr-toggle');
   if (ntrBox) {
     ntrBox.addEventListener('change', function () {
       ntrEnabled = ntrBox.checked;
+      replot();
+    });
+  }
+
+  var demeanBox = document.getElementById('demean-toggle');
+  if (demeanBox) {
+    demeanBox.addEventListener('change', function () {
+      demeanEnabled = demeanBox.checked;
       replot();
     });
   }

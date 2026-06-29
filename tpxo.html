@@ -167,17 +167,16 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Values from compass analysis stdout; fill in after both runs complete -->
-        <tr><td>M2</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
-        <tr><td>S2</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
-        <tr><td>N2</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
-        <tr><td>K1</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
-        <tr><td>O1</td> <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td> <td colspan="3" style="color:var(--text-muted);font-style:italic">pending</td></tr>
+        <tr><td>M2</td> <td>8.143</td><td>7.135</td><td>15.373</td>  <td>4.979</td><td>2.695</td><td>14.176</td></tr>
+        <tr><td>S2</td> <td>3.582</td><td>3.065</td><td>6.825</td>   <td>2.117</td><td>1.336</td><td>4.553</td></tr>
+        <tr><td>N2</td> <td>1.654</td><td>1.426</td><td>3.292</td>   <td>0.920</td><td>0.542</td><td>2.475</td></tr>
+        <tr><td>K1</td> <td>2.496</td><td>1.261</td><td>6.626</td>   <td>1.861</td><td>1.134</td><td>3.973</td></tr>
+        <tr><td>O1</td> <td>1.858</td><td>1.112</td><td>4.530</td>   <td>1.336</td><td>0.686</td><td>2.946</td></tr>
       </tbody>
     </table>
     <p class="caption">
-      &mdash; = value not yet available (compass analysis run pending).
-      Values filled in from <code>compass run</code> stdout output.
+      All values in cm. BP Anomaly values computed from <code>harmonicAnalysis.nc</code>;
+      Atm Tide Only values from <code>compass run</code> stdout.
     </p>
   </div>
 
@@ -187,7 +186,7 @@
     <!-- Run tabs -->
     <div class="run-tabs">
       <div class="run-tab active"     id="tab-bpanomaly"    onclick="selectRun('bpanomaly')">BP Anomaly</div>
-      <div class="run-tab unavailable" id="tab-atm-tide-only" title="Compass analysis run not yet complete">Atm Tide Only</div>
+      <div class="run-tab" id="tab-atm-tide-only" onclick="selectRun('atm-tide-only')">Atm Tide Only</div>
     </div>
 
     <!-- Constituent selector -->
@@ -218,7 +217,7 @@
   var currentConst = 'M2';
 
   // Which runs have images available
-  var availableRuns = { 'bpanomaly': true, 'atm-tide-only': false };
+  var availableRuns = { 'bpanomaly': true, 'atm-tide-only': true };
 
   function updatePlot() {
     var img = document.getElementById('plot-img');
