@@ -69,7 +69,7 @@
     border-color: var(--accent);
   }
 
-  /* View selector (constituent map vs diff map vs amp bias) */
+  /* View selector */
   .view-nav {
     display: flex;
     gap: 0.5rem;
@@ -98,6 +98,8 @@
   /* Only show diff/bias views when bpanomaly is selected */
   .diff-only { display: none; }
   .show-diff-views .diff-only { display: inline-block; }
+
+  .sep { width: 1px; height: 1.2rem; background: var(--border); align-self: center; }
 
   .plot-display {
     background: var(--card-bg);
@@ -325,9 +327,12 @@
       <div class="run-tab run-zae"             onclick="selectRun('ZAE0.4')">ZAE=0.4 (6mo)</div>
     </div>
 
-    <!-- View selector: shown only when bpanomaly is active -->
+    <!-- View selector -->
     <div class="view-nav" id="view-nav">
       <button class="view-btn active" onclick="selectView('harmonic')">Harmonic maps</button>
+      <button class="view-btn"        onclick="selectView('amperr')">Amplitude error</button>
+      <button class="view-btn"        onclick="selectView('phaseerr')">Phase error</button>
+      <div class="sep"></div>
       <button class="view-btn diff-only" onclick="selectView('diff')">RMSE difference (BP &minus; Atm)</button>
       <button class="view-btn diff-only" onclick="selectView('ampbias')">Amplitude bias</button>
     </div>
@@ -369,8 +374,16 @@
 
   var captions = {
     'harmonic': 'Each panel: (top-left) MPAS-Ocean amplitude, (top-right) TPXO9 amplitude, (bottom-left) amplitude RMSE, (bottom-right) complex RMSE. Phase co-tidal lines overlaid. Color scale in metres.',
+    'amperr':   'Amplitude error Am &minus; At (cm). Red = model over-predicts; blue = model under-predicts. Color scale is shared across all runs for direct comparison.',
+    'phaseerr': 'Phase error &phi;m &minus; &phi;t (degrees, wrapped to &plusmn;180&deg;). Red = model leads TPXO9; blue = model lags. Color scale is shared across all runs.',
     'diff':     'Complex RMSE difference (BP Anomaly &minus; Atm-Tide-Only) in cm. Red = BP Anomaly worse; blue = BP Anomaly better.',
     'ampbias':  'Amplitude bias (model &minus; TPXO9) for BP Anomaly (left) and Atm-Only (right) in cm.',
+  };
+
+  var viewFiles = {
+    'harmonic': '_plot.png',
+    'amperr':   '_amp_error.png',
+    'phaseerr': '_phase_error.png',
   };
 
   function updatePlot() {
@@ -383,7 +396,7 @@
     } else if (currentView === 'ampbias') {
       src = 'img/tidal_rmse_diff/' + currentConst + '_amp_bias.png';
     } else {
-      src = runDirs[currentRun] + '/' + currentConst + '_plot.png';
+      src = runDirs[currentRun] + '/' + currentConst + viewFiles[currentView];
     }
 
     display.innerHTML = '<img id="plot-img" src="' + src + '" alt="' + currentConst + ' plot">';
@@ -403,21 +416,26 @@
     var viewNav = document.getElementById('view-nav');
     viewNav.classList.toggle('show-diff-views', run === 'bpanomaly');
 
-    // Reset view btn
+    // Reset view btn highlight
     document.querySelectorAll('.view-btn').forEach(function(b) {
-      b.classList.toggle('active', b.textContent.trim() === 'Harmonic maps');
+      b.classList.toggle('active', b.textContent.trim() === viewLabels['harmonic']);
     });
 
     updatePlot();
   }
 
+  var viewLabels = {
+    'harmonic': 'Harmonic maps',
+    'amperr':   'Amplitude error',
+    'phaseerr': 'Phase error',
+    'diff':     'RMSE difference',
+    'ampbias':  'Amplitude bias',
+  };
+
   function selectView(view) {
     currentView = view;
     document.querySelectorAll('.view-btn').forEach(function(b) {
-      var match = (view === 'harmonic' && b.textContent.trim() === 'Harmonic maps') ||
-                  (view === 'diff'     && b.textContent.includes('RMSE difference')) ||
-                  (view === 'ampbias'  && b.textContent.includes('Amplitude bias'));
-      b.classList.toggle('active', match);
+      b.classList.toggle('active', b.textContent.trim().startsWith(viewLabels[view]));
     });
     updatePlot();
   }
