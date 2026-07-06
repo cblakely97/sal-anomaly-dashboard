@@ -12,6 +12,7 @@
     margin-bottom: 1.5rem;
     border-bottom: 2px solid var(--border);
     padding-bottom: 0;
+    flex-wrap: wrap;
   }
 
   .run-tab {
@@ -35,10 +36,9 @@
     border-bottom: 2px solid var(--card-bg);
   }
 
-  .run-tab.unavailable {
-    opacity: 0.45;
-    cursor: default;
-  }
+  .run-tab.run-coupled  { border-top: 3px solid #2ca02c; }
+  .run-tab.run-baseline { border-top: 3px solid #1f77b4; }
+  .run-tab.run-zae      { border-top: 3px solid #ff7f0e; }
 
   .run-panel { display: none; }
   .run-panel.active { display: block; }
@@ -69,6 +69,36 @@
     border-color: var(--accent);
   }
 
+  /* View selector (constituent map vs diff map vs amp bias) */
+  .view-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.6rem;
+  }
+
+  .view-btn {
+    padding: 0.25rem 0.8rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text-muted);
+  }
+
+  .view-btn.active {
+    background: #e9ecef;
+    color: var(--text);
+    border-color: #adb5bd;
+  }
+
+  /* Only show diff/bias views when bpanomaly is selected */
+  .diff-only { display: none; }
+  .show-diff-views .diff-only { display: inline-block; }
+
   .plot-display {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -92,6 +122,7 @@
     font-size: 0.95rem;
   }
 
+  /* RMSE table */
   .rmse-table {
     width: 100%;
     border-collapse: collapse;
@@ -99,22 +130,67 @@
   }
 
   .rmse-table th, .rmse-table td {
-    padding: 0.4rem 0.75rem;
+    padding: 0.4rem 0.65rem;
     text-align: right;
     border-bottom: 1px solid var(--border);
+    white-space: nowrap;
   }
 
   .rmse-table th:first-child,
-  .rmse-table td:first-child { text-align: left; font-family: monospace; font-weight: 600; }
+  .rmse-table td:first-child {
+    text-align: left;
+    font-family: monospace;
+    font-weight: 600;
+    width: 3em;
+  }
 
   .rmse-table th { color: var(--text-muted); font-weight: 500; }
   .rmse-table tr:last-child td { border-bottom: none; }
+
+  /* Highlight best value per row */
+  .best { color: #198754; font-weight: 700; }
+  .worst { color: #dc3545; }
+
+  /* Region tabs for the RMSE table */
+  .region-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .region-btn {
+    padding: 0.25rem 0.9rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text-muted);
+  }
+
+  .region-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .region-panel { display: none; }
+  .region-panel.active { display: block; }
 
   .caption {
     font-size: 0.82rem;
     color: var(--text-muted);
     margin-top: 0.75rem;
     line-height: 1.5;
+  }
+
+  .run-badge {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
   }
 </style>
 </head>
@@ -125,6 +201,7 @@
   <nav>
     <a href="index.html">About</a>
     <a href="tpxo.html" class="active">TPXO9 Validation</a>
+    <a href="zae.html">ZAE Sensitivity</a>
     <a href="comparison.html">Station Comparison</a>
   </nav>
 </header>
@@ -135,62 +212,128 @@
     <h2>Global Harmonic Validation vs. TPXO9</h2>
     <p>
       Tidal constituents extracted from <code>harmonicAnalysis.nc</code>
-      (MPAS-Ocean harmonic analysis member) are compared against TPXO9 atlas
-      amplitudes and phases at every ocean cell. Extraction uses OTPS2
-      <code>extract_HC</code> (128 parallel processes). Error metrics follow
-      the complex RMSE definition:
+      are compared against TPXO9 atlas amplitudes and phases at every ocean cell.
+      Error metric: complex RMSE
     </p>
     <p style="margin:0.75rem 0 0 1.5rem; font-family:monospace; font-size:0.88rem;">
       E&#x1D450; = &radic;[ &frac12;(A&#x2098;&#xB2; + A&#x209C;&#xB2;) &minus; A&#x2098; A&#x209C; cos(&phi;&#x2098; &minus; &phi;&#x209C;) ]
     </p>
     <p style="margin-top:0.6rem; font-size:0.9rem;">
-      where subscripts m and t denote model and TPXO9 respectively.
-      Global RMSE is area-weighted over all ocean cells with depth &gt; 20 m.
-      Deep ocean excludes cells shallower than 1000 m;
-      shallow ocean restricts to 20&ndash;1000 m depth, |lat| &lt; 66&deg;.
+      Global: depth &gt; 20 m.
+      Deep: depth &ge; 1000 m, |lat| &lt; 66&deg;.
+      Shallow: 20 &ndash; 1000 m, |lat| &lt; 66&deg;.
+      RMSE is area-weighted. Green = best in column; red = worst.
     </p>
   </div>
 
+  <!-- ── RMSE Table ── -->
   <div class="card">
     <h2>RMSE Summary</h2>
-    <table class="rmse-table" id="rmse-table">
-      <thead>
-        <tr>
-          <th>Constituent</th>
-          <th colspan="3">BP Anomaly &mdash; Complex RMSE (cm)</th>
-          <th colspan="3">Atm Tide Only &mdash; Complex RMSE (cm)</th>
-        </tr>
-        <tr>
-          <th></th>
-          <th>Global</th><th>Deep</th><th>Shallow</th>
-          <th>Global</th><th>Deep</th><th>Shallow</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>M2</td> <td>8.143</td><td>7.135</td><td>15.373</td>  <td>4.979</td><td>2.695</td><td>14.176</td></tr>
-        <tr><td>S2</td> <td>3.582</td><td>3.065</td><td>6.825</td>   <td>2.117</td><td>1.336</td><td>4.553</td></tr>
-        <tr><td>N2</td> <td>1.654</td><td>1.426</td><td>3.292</td>   <td>0.920</td><td>0.542</td><td>2.475</td></tr>
-        <tr><td>K1</td> <td>2.496</td><td>1.261</td><td>6.626</td>   <td>1.861</td><td>1.134</td><td>3.973</td></tr>
-        <tr><td>O1</td> <td>1.858</td><td>1.112</td><td>4.530</td>   <td>1.336</td><td>0.686</td><td>2.946</td></tr>
-      </tbody>
-    </table>
+
+    <div class="region-tabs">
+      <button class="region-btn active" onclick="selectRegion('global')">Global</button>
+      <button class="region-btn"        onclick="selectRegion('deep')">Deep (&ge;1000 m)</button>
+      <button class="region-btn"        onclick="selectRegion('shallow')">Shallow (20&ndash;1000 m)</button>
+    </div>
+
+    <!-- Global -->
+    <div class="region-panel active" id="region-global">
+      <table class="rmse-table">
+        <thead>
+          <tr>
+            <th>Con</th>
+            <th><span class="run-badge" style="background:#2ca02c"></span>BP Anomaly<br><small>1yr</small></th>
+            <th><span class="run-badge" style="background:#1f77b4"></span>Atm Only<br><small>1yr</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.1<br><small>6mo</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.2<br><small>6mo</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.4<br><small>6mo</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>M2</td> <td>8.024</td>          <td class="best">4.837</td> <td>5.867</td> <td>6.009</td> <td class="worst">9.763</td></tr>
+          <tr><td>S2</td> <td>3.480</td>          <td class="best">1.953</td> <td>2.738</td> <td>3.180</td> <td class="worst">4.779</td></tr>
+          <tr><td>N2</td> <td>1.636</td>          <td class="best">0.886</td> <td>1.023</td> <td>1.019</td> <td class="worst">1.803</td></tr>
+          <tr><td>K1</td> <td class="worst">2.401</td> <td class="best">1.732</td> <td>2.752</td> <td>2.534</td> <td>2.879</td></tr>
+          <tr><td>O1</td> <td>1.740</td>          <td class="best">1.158</td> <td>1.921</td> <td>1.747</td> <td class="worst">1.824</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Deep -->
+    <div class="region-panel" id="region-deep">
+      <table class="rmse-table">
+        <thead>
+          <tr>
+            <th>Con</th>
+            <th><span class="run-badge" style="background:#2ca02c"></span>BP Anomaly<br><small>1yr</small></th>
+            <th><span class="run-badge" style="background:#1f77b4"></span>Atm Only<br><small>1yr</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.1<br><small>6mo</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.2<br><small>6mo</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.4<br><small>6mo</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>M2</td> <td>7.135</td>          <td class="best">2.695</td> <td>3.759</td> <td>4.621</td> <td class="worst">9.019</td></tr>
+          <tr><td>S2</td> <td>3.065</td>          <td class="best">1.336</td> <td>2.113</td> <td>2.657</td> <td class="worst">4.320</td></tr>
+          <tr><td>N2</td> <td>1.426</td>          <td class="best">0.542</td> <td>0.695</td> <td>0.821</td> <td class="worst">1.672</td></tr>
+          <tr><td>K1</td> <td class="worst">1.261</td> <td class="best">1.134</td> <td>1.609</td> <td>1.339</td> <td>1.754</td></tr>
+          <tr><td>O1</td> <td>1.112</td>          <td class="best">0.686</td> <td>1.365</td> <td>1.132</td> <td class="worst">1.261</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Shallow -->
+    <div class="region-panel" id="region-shallow">
+      <table class="rmse-table">
+        <thead>
+          <tr>
+            <th>Con</th>
+            <th><span class="run-badge" style="background:#2ca02c"></span>BP Anomaly<br><small>1yr</small></th>
+            <th><span class="run-badge" style="background:#1f77b4"></span>Atm Only<br><small>1yr</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.1<br><small>6mo</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.2<br><small>6mo</small></th>
+            <th><span class="run-badge" style="background:#ff7f0e"></span>ZAE=0.4<br><small>6mo</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>M2</td> <td>15.379</td>         <td class="best">14.182</td> <td>16.293</td> <td>14.448</td> <td class="worst">16.925</td></tr>
+          <tr><td>S2</td> <td>6.824</td>          <td class="best">4.545</td>  <td>6.366</td>  <td>6.869</td>  <td class="worst">8.798</td></tr>
+          <tr><td>N2</td> <td>3.293</td>          <td class="best">2.476</td>  <td>2.703</td>  <td class="best">2.283</td> <td class="worst">3.053</td></tr>
+          <tr><td>K1</td> <td>6.624</td>          <td class="best">3.966</td>  <td class="worst">7.210</td> <td>7.008</td> <td>7.701</td></tr>
+          <tr><td>O1</td> <td>4.523</td>          <td class="best">2.936</td>  <td class="worst">4.607</td> <td>4.536</td> <td>4.467</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <p class="caption">
-      All values in cm. BP Anomaly values computed from <code>harmonicAnalysis.nc</code>;
-      Atm Tide Only values from <code>compass run</code> stdout.
+      All values in cm. BP Anomaly and Atm-Only are full-year (Jan&ndash;Dec 2017) runs.
+      ZAE runs are 6-month (Oct 2016&ndash;Apr 2017) with harmonics over Jan&ndash;Apr 2017
+      and are not directly comparable in absolute magnitude &mdash; relative ordering is meaningful.
     </p>
   </div>
 
+  <!-- ── Constituent Maps ── -->
   <div class="card">
     <h2>Constituent Maps</h2>
 
     <!-- Run tabs -->
-    <div class="run-tabs">
-      <div class="run-tab active"     id="tab-bpanomaly"    onclick="selectRun('bpanomaly')">BP Anomaly</div>
-      <div class="run-tab" id="tab-atm-tide-only" onclick="selectRun('atm-tide-only')">Atm Tide Only</div>
+    <div class="run-tabs" id="run-tabs">
+      <div class="run-tab run-coupled  active" onclick="selectRun('bpanomaly')">BP Anomaly (1yr)</div>
+      <div class="run-tab run-baseline"        onclick="selectRun('atm-tide-only')">Atm Only (1yr)</div>
+      <div class="run-tab run-zae"             onclick="selectRun('ZAE0.1')">ZAE=0.1 (6mo)</div>
+      <div class="run-tab run-zae"             onclick="selectRun('ZAE0.2')">ZAE=0.2 (6mo)</div>
+      <div class="run-tab run-zae"             onclick="selectRun('ZAE0.4')">ZAE=0.4 (6mo)</div>
+    </div>
+
+    <!-- View selector: shown only when bpanomaly is active -->
+    <div class="view-nav" id="view-nav">
+      <button class="view-btn active" onclick="selectView('harmonic')">Harmonic maps</button>
+      <button class="view-btn diff-only" onclick="selectView('diff')">RMSE difference (BP &minus; Atm)</button>
+      <button class="view-btn diff-only" onclick="selectView('ampbias')">Amplitude bias</button>
     </div>
 
     <!-- Constituent selector -->
-    <div class="const-nav" id="const-nav">
+    <div class="const-nav">
       <button class="const-btn active" onclick="selectConst('M2')">M2</button>
       <button class="const-btn"        onclick="selectConst('S2')">S2</button>
       <button class="const-btn"        onclick="selectConst('N2')">N2</button>
@@ -202,11 +345,10 @@
     <div class="plot-display" id="plot-display">
       <img id="plot-img" src="img/tpxo/bpanomaly/M2_plot.png" alt="M2 TPXO9 comparison">
     </div>
-    <p class="caption">
-      Each panel shows (top-left) MPAS-Ocean amplitude, (top-right) TPXO9 amplitude,
+    <p class="caption" id="plot-caption">
+      Each panel: (top-left) MPAS-Ocean amplitude, (top-right) TPXO9 amplitude,
       (bottom-left) amplitude RMSE, (bottom-right) complex RMSE.
-      Phase co-tidal lines overlaid on amplitude panels.
-      Color scale in metres.
+      Phase co-tidal lines overlaid. Color scale in metres.
     </p>
   </div>
 
@@ -215,26 +357,68 @@
 <script>
   var currentRun   = 'bpanomaly';
   var currentConst = 'M2';
+  var currentView  = 'harmonic';
 
-  // Which runs have images available
-  var availableRuns = { 'bpanomaly': true, 'atm-tide-only': true };
+  var runDirs = {
+    'bpanomaly':    'img/tpxo/bpanomaly',
+    'atm-tide-only':'img/tpxo/atm-tide-only',
+    'ZAE0.1':       'img/tpxo/ZAE0.1',
+    'ZAE0.2':       'img/tpxo/ZAE0.2',
+    'ZAE0.4':       'img/tpxo/ZAE0.4',
+  };
+
+  var captions = {
+    'harmonic': 'Each panel: (top-left) MPAS-Ocean amplitude, (top-right) TPXO9 amplitude, (bottom-left) amplitude RMSE, (bottom-right) complex RMSE. Phase co-tidal lines overlaid. Color scale in metres.',
+    'diff':     'Complex RMSE difference (BP Anomaly &minus; Atm-Tide-Only) in cm. Red = BP Anomaly worse; blue = BP Anomaly better.',
+    'ampbias':  'Amplitude bias (model &minus; TPXO9) for BP Anomaly (left) and Atm-Only (right) in cm.',
+  };
 
   function updatePlot() {
-    var img = document.getElementById('plot-img');
     var display = document.getElementById('plot-display');
-    if (!availableRuns[currentRun]) {
-      display.innerHTML = '<p class="no-data">Compass analysis run not yet complete for this configuration.</p>';
-      return;
+    var cap     = document.getElementById('plot-caption');
+    var src;
+
+    if (currentView === 'diff') {
+      src = 'img/tidal_rmse_diff/' + currentConst + '_rmse_diff.png';
+    } else if (currentView === 'ampbias') {
+      src = 'img/tidal_rmse_diff/' + currentConst + '_amp_bias.png';
+    } else {
+      src = runDirs[currentRun] + '/' + currentConst + '_plot.png';
     }
-    var path = 'img/tpxo/' + currentRun + '/' + currentConst + '_plot.png';
-    display.innerHTML = '<img id="plot-img" src="' + path + '" alt="' + currentConst + ' TPXO9 comparison">';
+
+    display.innerHTML = '<img id="plot-img" src="' + src + '" alt="' + currentConst + ' plot">';
+    cap.innerHTML = captions[currentView];
   }
 
   function selectRun(run) {
-    if (!availableRuns[run]) return;
-    currentRun = run;
-    document.querySelectorAll('.run-tab').forEach(function(t) { t.classList.remove('active'); });
-    document.getElementById('tab-' + run).classList.add('active');
+    currentRun  = run;
+    currentView = 'harmonic';  // reset view on run change
+
+    // Update run tab highlighting
+    var tabs = document.querySelectorAll('.run-tab');
+    var runKeys = ['bpanomaly', 'atm-tide-only', 'ZAE0.1', 'ZAE0.2', 'ZAE0.4'];
+    tabs.forEach(function(t, i) { t.classList.toggle('active', runKeys[i] === run); });
+
+    // Show diff/bias view buttons only for bpanomaly
+    var viewNav = document.getElementById('view-nav');
+    viewNav.classList.toggle('show-diff-views', run === 'bpanomaly');
+
+    // Reset view btn
+    document.querySelectorAll('.view-btn').forEach(function(b) {
+      b.classList.toggle('active', b.textContent.trim() === 'Harmonic maps');
+    });
+
+    updatePlot();
+  }
+
+  function selectView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-btn').forEach(function(b) {
+      var match = (view === 'harmonic' && b.textContent.trim() === 'Harmonic maps') ||
+                  (view === 'diff'     && b.textContent.includes('RMSE difference')) ||
+                  (view === 'ampbias'  && b.textContent.includes('Amplitude bias'));
+      b.classList.toggle('active', match);
+    });
     updatePlot();
   }
 
@@ -245,6 +429,16 @@
     });
     updatePlot();
   }
+
+  function selectRegion(region) {
+    document.querySelectorAll('.region-btn').forEach(function(b) { b.classList.remove('active'); });
+    event.target.classList.add('active');
+    document.querySelectorAll('.region-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.getElementById('region-' + region).classList.add('active');
+  }
+
+  // Init: show diff views for bpanomaly
+  document.getElementById('view-nav').classList.add('show-diff-views');
 </script>
 
 </body>
