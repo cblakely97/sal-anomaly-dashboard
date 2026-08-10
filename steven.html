@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MPAS-Ocean SAL &mdash; Station Comparison</title>
+<title>MPAS-Ocean SAL &mdash; Steven's VR45to5 Run</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -17,31 +17,24 @@
     <a href="index.html">About</a>
     <a href="tpxo.html">TPXO9 Validation</a>
     <a href="zae.html">ZAE Sensitivity</a>
-    <a href="comparison.html" class="active">Station Comparison</a>
-    <a href="steven.html">Steven's Run</a>
+    <a href="comparison.html">Station Comparison</a>
+    <a href="steven.html" class="active">Steven's Run</a>
   </nav>
 </header>
 
 <div class="container">
   <div class="disclaimer-banner">
-    <strong>Preliminary results.</strong>
-    Analysis window: 2017-01-01 to 2017-12-31. Stations shown have passed
-    amplitude quality control (M2, S2, K1, O1 &lt; 10&nbsp;m, |MSL offset| &lt; 5&nbsp;m).
+    <strong>Steven's VR45to5 tide-only run.</strong>
+    Analysis window: 2012-10-01 to 2012-10-03 (2-day test run). 490 stations
+    matched to GESLA v4 locations. No observations or NTR available for this window.
   </div>
 </div>
 
 <div class="comparison-layout">
   <div id="map"></div>
   <div id="timeseries-panel">
-    <div class="placeholder">Click a station on the map to view its time series comparison</div>
+    <div class="placeholder">Click a station on the map to view its time series</div>
     <div id="plot-controls" style="display:none">
-      <!-- Run visibility toggles — populated by JS from RUNS config -->
-      <div id="run-toggles"></div>
-      <div class="controls-sep"></div>
-      <label title="Switch between full SSH and non-tidal residual for all traces">
-        <input type="checkbox" id="ntr-toggle"> Show NTR
-      </label>
-      <div class="controls-sep"></div>
       <label title="Subtract each series mean to remove datum offsets">
         <input type="checkbox" id="demean-toggle"> Remove mean
       </label>
@@ -52,15 +45,14 @@
 
 <div class="container">
   <p class="disclaimer">
-    Tide gauge observations from the
+    Model output from Steven Brus's VR45to5 MPAS-Ocean tide-only run
+    (<code>/pscratch/sd/s/sbrus/compass_DEVR45to5rr1_full_tp/</code>).
+    Station locations from the
     <a href="https://gesla787883612.wordpress.com/" target="_blank">GESLA v4</a>
-    dataset (Haigh et al., 2022;
-    <a href="https://doi.org/10.1002/gdj3.174" target="_blank">doi:10.1002/gdj3.174</a>).
-    Map marker color indicates total SSH RMSE (bpanomaly run vs.&nbsp;GESLA):
-    green &lt; 0.10&nbsp;m, orange 0.10&ndash;0.25&nbsp;m, red &gt; 0.25&nbsp;m.
+    dataset (Haigh et al., 2022).
   </p>
 </div>
 
-<script src="js/comparison.js"></script>
+<script src="js/steven.js"></script>
 </body>
 </html>
