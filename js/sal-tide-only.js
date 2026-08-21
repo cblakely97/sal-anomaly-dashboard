@@ -127,9 +127,9 @@
           popupHtml += '<div style="margin-top:4px"><strong>' + RUNS[0].label + '</strong></div>';
           popupHtml +=
             '<div class="metric-row"><span>RMSE:</span> <span>' + rmseLabel(m.rmse_m) + '</span></div>' +
-            '<div class="metric-row"><span>r:</span> <span>' + (isNaN(m.correlation) ? 'N/A' : m.correlation.toFixed(3)) + '</span></div>' +
-            '<div class="metric-row"><span>Bias:</span> <span>' + m.bias_m.toFixed(3) + ' m</span></div>' +
-            '<div class="metric-row"><span>Overlap:</span> <span>' + m.n_hours.toLocaleString() + ' hrs</span></div>';
+            '<div class="metric-row"><span>r:</span> <span>' + (m.correlation == null || isNaN(m.correlation) ? 'N/A' : m.correlation.toFixed(3)) + '</span></div>' +
+            '<div class="metric-row"><span>Bias:</span> <span>' + (m.bias_m == null ? 'N/A' : m.bias_m.toFixed(3) + ' m') + '</span></div>' +
+            '<div class="metric-row"><span>Overlap:</span> <span>' + (m.n_hours == null ? 'N/A' : m.n_hours.toLocaleString() + ' hrs') + '</span></div>';
         }
 
         marker.bindPopup(popupHtml);
