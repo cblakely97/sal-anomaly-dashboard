@@ -142,8 +142,8 @@
             popupHtml += '<div style="margin-top:4px"><strong>' + r.label + '</strong></div>';
             popupHtml +=
               '<div class="metric-row"><span>RMSE:</span> <span>' + rmseLabel(m.rmse_m) + '</span></div>' +
-              '<div class="metric-row"><span>r:</span> <span>' + (isNaN(m.correlation) ? 'N/A' : m.correlation.toFixed(3)) + '</span></div>' +
-              '<div class="metric-row"><span>Bias:</span> <span>' + m.bias_m.toFixed(3) + ' m</span></div>';
+              '<div class="metric-row"><span>r:</span> <span>' + (m.correlation == null || isNaN(m.correlation) ? 'N/A' : m.correlation.toFixed(3)) + '</span></div>' +
+              '<div class="metric-row"><span>Bias:</span> <span>' + (m.bias_m == null ? 'N/A' : m.bias_m.toFixed(3) + ' m') + '</span></div>';
           });
           if (stn.metrics[primaryKey] && stn.metrics[primaryKey].n_hours) {
             popupHtml +=
@@ -418,9 +418,9 @@
     if (primaryMetrics) {
       var m = primaryMetrics;
       var txt = RUNS[0].label + ':  ' +
-        'RMSE ' + m.rmse_m.toFixed(3) + ' m  |  ' +
-        'r ' + m.correlation.toFixed(3) + '  |  ' +
-        'Bias ' + m.bias_m.toFixed(3) + ' m';
+        'RMSE ' + (m.rmse_m == null ? 'N/A' : m.rmse_m.toFixed(3) + ' m') + '  |  ' +
+        'r ' + (m.correlation == null || isNaN(m.correlation) ? 'N/A' : m.correlation.toFixed(3)) + '  |  ' +
+        'Bias ' + (m.bias_m == null ? 'N/A' : m.bias_m.toFixed(3) + ' m');
       if (m.n_hours) txt += '  |  N ' + m.n_hours.toLocaleString() + ' hrs';
       annotations.push({
         text: txt,
