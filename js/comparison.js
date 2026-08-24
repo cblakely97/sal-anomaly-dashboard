@@ -9,8 +9,10 @@
   // -----------------------------------------------------------------------
 
   var RUNS = [
-    { key: 'bpanomaly',    label: 'BP Anomaly',      color: '#2ca02c' },
-    { key: 'atm-tide-only', label: 'Atm Tide Only',  color: '#1f77b4' },
+    { key: 'bpanomaly',     label: 'BP Anomaly',      color: '#2ca02c' },
+    { key: 'atm-tide-only', label: 'Atm + Tide',      color: '#1f77b4' },
+    { key: 'sal-tide-only', label: 'SAL Tide-Only',   color: '#9467bd' },
+    { key: 'atm-only',      label: 'Atm Only',        color: '#d62728' },
   ];
   var OBS_COLOR = '#000000';
 
@@ -225,7 +227,7 @@
     legend.onAdd = function () {
       var div = L.DomUtil.create('div', 'legend');
       div.innerHTML =
-        '<b>SSH RMSE (bpanomaly)</b>' +
+        '<b>SSH RMSE (BP Anomaly run)</b>' +
         '<br><i style="background:#2ca02c"></i> &lt; 0.10 m' +
         '<br><i style="background:#ff7f0e"></i> 0.10 &ndash; 0.25 m' +
         '<br><i style="background:#d62728"></i> &gt; 0.25 m' +
