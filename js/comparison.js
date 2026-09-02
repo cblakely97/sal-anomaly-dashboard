@@ -13,6 +13,7 @@
     { key: 'atm-tide-only', label: 'Atm + Tide',      color: '#1f77b4' },
     { key: 'sal-tide-only', label: 'SAL Tide-Only',   color: '#9467bd' },
     { key: 'atm-only',      label: 'Atm Only',        color: '#d62728' },
+    { key: 'atm-tide-v2',   label: 'Atm+Tide v2 (del2=3.3)',  color: '#ff7f0e' },
   ];
   var OBS_COLOR = '#000000';
 
