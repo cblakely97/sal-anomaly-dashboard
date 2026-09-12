@@ -9,6 +9,7 @@
     { key: 'tide-nosal',   label: 'Tide (no SAL)',          color: '#e377c2' },
     { key: 'atm-only',     label: 'Atm Only',               color: '#d62728' },
     { key: 'atm-tide-del4',label: 'Atm+Tide del4 (1.9e9)', color: '#ff7f0e' },
+    { key: 'gofs-noatm',   label: 'GOFS (no atm)',          color: '#8c564b' },
   ];
   var OBS_COLOR = '#000000';
 
