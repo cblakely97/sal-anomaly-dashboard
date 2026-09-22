@@ -3,14 +3,13 @@
   'use strict';
 
   var RUNS = [
-    { key: 'bpanomaly',    label: 'BP Anomaly (GOFS)',      color: '#2ca02c' },
     { key: 'atm-tide',     label: 'Atm + Tide',             color: '#1f77b4' },
+    { key: 'lim-16mo',     label: 'Atm+Tide IceMask',       color: '#17becf' },
+    { key: 'atm-only',     label: 'Atm Only',               color: '#d62728' },
     { key: 'tide-only',    label: 'Tide Only',              color: '#9467bd' },
     { key: 'tide-nosal',   label: 'Tide (no SAL)',          color: '#e377c2' },
-    { key: 'atm-only',     label: 'Atm Only',               color: '#d62728' },
+    { key: 'bpanomaly',    label: 'BP Anomaly (GOFS)',      color: '#2ca02c' },
     { key: 'atm-tide-del4',label: 'Atm+Tide del4 (1.9e9)', color: '#ff7f0e' },
-    { key: 'gofs-noatm',   label: 'GOFS (no atm)',          color: '#8c564b' },
-    { key: 'lim-16mo',    label: 'Atm+Tide IceMask',       color: '#17becf' },
   ];
   var OBS_COLOR = '#000000';
 
