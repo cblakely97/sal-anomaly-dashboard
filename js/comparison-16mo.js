@@ -4,8 +4,8 @@
 
   var RUNS = [
     { key: 'atm-tide',     label: 'Atm + Tide',             color: '#1f77b4' },
-    { key: 'lim-16mo',     label: 'Atm+Tide IceMask',       color: '#17becf' },
-    { key: 'atm-only',     label: 'Atm Only',               color: '#d62728' },
+    { key: 'lim-16mo',     label: 'Atm+Tide IceMask',       color: '#d62728' },
+    { key: 'atm-only',     label: 'Atm Only',               color: '#17becf' },
     { key: 'tide-only',    label: 'Tide Only',              color: '#9467bd' },
     { key: 'tide-nosal',   label: 'Tide (no SAL)',          color: '#e377c2' },
     { key: 'bpanomaly',    label: 'BP Anomaly (GOFS)',      color: '#2ca02c' },
